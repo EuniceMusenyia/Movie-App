@@ -12,7 +12,7 @@ export async function apiFetch(apiProps: ApiFetchProps) {
   }
   try {
     const response = await fetch(`${BASE_URL}${apiProps.path}`, {
-      method: apiProps.method || 'GET', 
+      method: apiProps.method || 'GET',
       headers: {
         'Authorization': `Bearer ${ACCESS_TOKEN}`,
         'Content-Type': 'application/json',

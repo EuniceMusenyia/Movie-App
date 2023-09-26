@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { getGenres } from "../utilities/utils";
-import { NEXT_PUBLIC_IMAGE_BASE_URL } from "@/app/config";
+import { getMovies } from "../utilities/getMovies";
+import { NEXT_PUBLIC_IMAGE_BASE_URL } from "../config";
 import Link from "next/link";
-import { getMovies } from "@/app/utilities/getMovies";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 interface Genre {
   id: number;
@@ -18,7 +21,7 @@ interface Movie {
 
 export default function GenreList() {
   const [genres, setGenres] = useState<Genre[] | null>(null);
-  const [selectedGenre, setSelectedGenre] = useState<number| null>(null);
+  const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
   const [movies, setMovies] = useState<Movie[]>([]);
 
   useEffect(() => {
@@ -34,7 +37,7 @@ export default function GenreList() {
     const fetchMovies = async () => {
       try {
         const movieData = await getMovies();
-        setMovies(movieData.results);
+        setMovies(movieData);
       } catch (error) {
         console.error("Error fetching movies:", error);
       }
@@ -44,34 +47,41 @@ export default function GenreList() {
     fetchMovies();
   }, []);
 
-  const handleClick = (genreId: number) => {
+  const handleGenreClick = (genreId: number) => {
     setSelectedGenre(genreId);
   };
 
   const filteredMovies = selectedGenre
-  ? (movies || []).filter((movie) => movie.genre_ids.includes(selectedGenre))
-  : movies || [];
+    ? movies.filter((movie) => movie.genre_ids.includes(selectedGenre))
+    : movies;
 
+  const sliderSettings = {
+    dots: true,
+    infinite: true,
+    slidesToShow: 9,
+    slidesToScroll: 1,
+  };
 
   return (
     <div className="p-4">
-      <div className="flex flex-wrap gap-2">
+      <h2 className="text-3xl text-center font-semibold mb-4 text-yellow-500 underline text-4xl">Genres</h2>
+      <Slider className="flex gap-1" {...sliderSettings}>
         {genres &&
           genres.map((genre) => (
             <div
               key={genre.id}
-              className={`bg-gray-400 px-4 py-2 rounded-full cursor-pointer ${
+              className={`bg-gray-700 border border-solid border-black px-2 py-3 text-center text-2xl rounded-full text-bold cursor-pointer mb-3 overflow-x-hidden ${
                 selectedGenre === genre.id ? "bg-yellow-500" : ""
               }`}
-              onClick={() => handleClick(genre.id)}
+              onClick={() => handleGenreClick(genre.id)}
             >
               {genre.name}
             </div>
           ))}
-      </div>
-      <div className="grid grid-cols-5 gap-4 mt-10">
-        {filteredMovies?.map((movie) =>{
-        return (
+      </Slider>
+
+      <div className="grid grid-cols-5 gap-4 mt-10 py-2">
+        {filteredMovies.map((movie) => (
           <Link href={`/movie/${movie.id}`} key={movie.title}>
             <div key={movie.id} className="">
               <img
@@ -81,7 +91,7 @@ export default function GenreList() {
               />
             </div>
           </Link>
-        )})}
+        ))}
       </div>
     </div>
   );
